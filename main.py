@@ -1,6 +1,7 @@
 import sqlite3
-from flask import Flask
+from flask import Flask,jsonify,request
 import pandas as pd
+from collections import OrderedDict
 
 
 app = Flask(__name__)
@@ -17,6 +18,21 @@ def read_excel_data():
     conn.close()
 
 
+@app.route('/data',methods=['GET'])
+def get_data():
+    well = request.args.get('well')
+    print("well",well)
+    conn = sqlite3.connect('Ohio.db')
+    cursor = conn.execute('SELECT * FROM quarterly_productiontbl WHERE "API WELL  NUMBER" = ?', (well,))
+    row_data = cursor.fetchone()
+    conn.close()
+    data_val = {
+        "oil":row_data[1],
+        "gas":row_data[2],
+        "brine":row_data[3],
+    }
+    print(data_val)
+    return jsonify(data_val)
 
    
 
